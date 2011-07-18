@@ -1,9 +1,10 @@
+# require 'patron'
 require 'httpclient'
 require 'cgi'
 
 module ElasticSearch
   module Transport
-    class HTTP < Base
+    class HTTPHTTPClient < Base
 
       DEFAULTS = {
         :timeout => 5
@@ -42,7 +43,6 @@ module ElasticSearch
           raise e
         end
       end
-      
     end
   end
 end

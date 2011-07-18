@@ -1,9 +1,9 @@
-require 'httpclient'
+require 'patron'
 require 'cgi'
 
 module ElasticSearch
-  module Transport
-    class HTTP < Base
+  module TransportPatron
+    class HTTPPatron < Base
 
       DEFAULTS = {
         :timeout => 5
@@ -15,7 +15,10 @@ module ElasticSearch
       end
 
       def connect!
-        @session = HTTPClient.new
+        @session = Patron::Session.new
+        @session.base_url = @server
+        @session.timeout = @options[:timeout]
+        @session.headers['User-Agent'] = 'ElasticSearch.rb v0.1'
       end
 
       def all_nodes
@@ -35,14 +38,23 @@ module ElasticSearch
           uri = generate_uri(operation)
           query = generate_query_string(params)
           path = [uri, query].join("?")
-          response = @session.send(method.to_sym, "http://#{@server}#{path}", body, headers)
+          # puts "request: #{method} #{@server} #{path} #{body}"
+          response = @session.request(method, path, headers, :data => body)
           handle_error(response) if response.status >= 500
           response
         rescue Exception => e
-          raise e
+          case e
+          when Patron::ConnectionFailed
+            raise ConnectionFailed
+          when Patron::HostResolutionError
+            raise HostResolutionError
+          when Patron::TimeoutError
+            raise TimeoutError
+          else
+            raise e
+          end
         end
       end
-      
     end
   end
 end
