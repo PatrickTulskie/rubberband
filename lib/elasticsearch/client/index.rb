@@ -41,6 +41,8 @@ module ElasticSearch
       end
 
       def delete(id, options={})
+        return false if id.to_s.empty?
+        
         index, type, options = extract_required_scope(options)
 
         if @batch

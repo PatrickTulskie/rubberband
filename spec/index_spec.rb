@@ -20,6 +20,13 @@ describe "index ops" do
     @client.delete("1", :refresh => true).should be_true
     @client.get("1").should be_nil
   end
+  
+  it "should not delete when passed a nil id" do
+    @client.index({:foo => "bar"}, :id => "1", :refresh => true)
+
+    @client.delete(nil).should be_false
+    @client.get("1").should_not be_nil
+  end
 
   it 'should search and count documents' do
     @client.index({:foo => "bar"}, :id => "1")
